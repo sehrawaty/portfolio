@@ -38,12 +38,24 @@ export const metadata: Metadata = {
     siteName: site.name,
     type: "website",
     locale: "en_US",
-    // Image comes from app/opengraph-image.tsx via the file convention.
+    // A real .png in /public, not next/og's extensionless route: under
+    // output: "export" that route emits a file with no extension, which
+    // Vercel serves as application/octet-stream. Several social crawlers
+    // reject a card image that isn't sent with an image/* content type.
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${site.name} — Backend engineer`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${site.name} — Backend engineer`,
     description,
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
 };
