@@ -1,137 +1,52 @@
 "use client";
 
-import {
-  animate,
-  motion,
-  useInView,
-  useMotionTemplate,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { animate, motion, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-export function Reveal({
-  children,
-  delay = 0,
-  className = "",
-  y = 28,
-}: {
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-  y?: number;
-}) {
+/** Fade and rise once when scrolled into view. Transform + opacity only, so it stays on the compositor. */
+export function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y, filter: "blur(8px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduce ? false : { opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] }}
     >
       {children}
     </motion.div>
   );
 }
 
-export function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+export function SectionHeading({ label, title, sub }: { label: string; title: string; sub?: string }) {
   return (
-    <Reveal className="mb-12 max-w-2xl">
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-cyan-300/80">{eyebrow}</p>
-      <h2 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
-        <span className="text-gradient">{title}</span>
-      </h2>
-      {sub && <p className="mt-4 text-lg text-white/55">{sub}</p>}
+    <Reveal className="mb-10 max-w-2xl md:mb-14">
+      <p className="mb-3 font-mono text-xs uppercase tracking-[0.12em] text-muted">{label}</p>
+      <h2 className="text-3xl font-semibold tracking-[-0.025em] text-ink md:text-[2.5rem] md:leading-[1.1]">{title}</h2>
+      {sub && <p className="mt-4 text-[1.0625rem] leading-relaxed text-muted">{sub}</p>}
     </Reveal>
   );
 }
 
-/** Card that tilts in 3D toward the cursor and paints a moving spotlight. */
-export function TiltCard({
-  children,
-  className = "",
-  intensity = 10,
-  glow = "rgba(124,92,255,0.35)",
-}: {
-  children: ReactNode;
-  className?: string;
-  intensity?: number;
-  glow?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const mx = useMotionValue(0.5);
-  const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [intensity, -intensity]), { stiffness: 200, damping: 20 });
-  const ry = useSpring(useTransform(mx, [0, 1], [-intensity, intensity]), { stiffness: 200, damping: 20 });
-  const gx = useTransform(mx, (v) => `${v * 100}%`);
-  const gy = useTransform(my, (v) => `${v * 100}%`);
-  const background = useMotionTemplate`radial-gradient(500px circle at ${gx} ${gy}, ${glow}, transparent 45%)`;
-
-  return (
-    <motion.div
-      ref={ref}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        mx.set((e.clientX - r.left) / r.width);
-        my.set((e.clientY - r.top) / r.height);
-      }}
-      onPointerLeave={() => {
-        mx.set(0.5);
-        my.set(0.5);
-      }}
-      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
-      className={`group relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-colors hover:border-white/20 ${className}`}
-    >
-      <motion.div
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background }}
-      />
-      <div className="relative h-full" style={{ transform: "translateZ(30px)" }}>
-        {children}
-      </div>
-    </motion.div>
-  );
+export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`rounded-xl border border-line bg-surface ${className}`}>{children}</div>;
 }
 
-export function Counter({ value, decimals = 0, suffix = "" }: { value: number; decimals?: number; suffix?: string }) {
+export function Counter({ value, decimals = 0 }: { value: number; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
-  const [display, setDisplay] = useState(0);
+  const reduce = useReducedMotion();
+  const [display, setDisplay] = useState(reduce ? value : 0);
   useEffect(() => {
-    if (!inView) return;
-    const c = animate(0, value, { duration: 1.8, ease: [0.22, 1, 0.36, 1], onUpdate: setDisplay });
+    if (!inView || reduce) return;
+    const c = animate(0, value, { duration: 1.2, ease: [0.25, 0.1, 0.25, 1], onUpdate: setDisplay });
     return () => c.stop();
-  }, [inView, value]);
+  }, [inView, value, reduce]);
   return (
     <span ref={ref} className="tabular-nums">
       {display.toFixed(decimals)}
-      {suffix}
     </span>
-  );
-}
-
-export function Magnetic({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useSpring(0, { stiffness: 250, damping: 15 });
-  const y = useSpring(0, { stiffness: 250, damping: 15 });
-  return (
-    <motion.div
-      ref={ref}
-      className={`inline-block ${className}`}
-      style={{ x, y }}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
-        y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
-      }}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
-      {children}
-    </motion.div>
   );
 }
 
