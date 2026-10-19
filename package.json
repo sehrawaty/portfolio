@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "framer-motion": "^14.4.0",
     "geist": "^1.8.1",

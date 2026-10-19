@@ -2,8 +2,8 @@
 
 Personal dashboard for Yash Sehrawat: a 3D, animated single page with live coding stats.
 
-- **Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 · React Three Fiber · Framer Motion · light and dark themes
-- **3D:** a rotating globe of service nodes with requests travelling between them (hero), paused when off screen
+- **Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 · React Three Fiber · Framer Motion · dark (default) and light themes
+- **3D:** liquid core orb with orbiting rings, a shader-driven particle galaxy that reacts to cursor and scroll, and a draggable skills sphere
 - **Live data:** LeetCode (GraphQL), Codeforces (public API) and GitHub (REST), fetched on the server and revalidated hourly (ISR). Each source falls back to cached values if it is unreachable.
 
 ## Run locally

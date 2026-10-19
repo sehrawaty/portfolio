@@ -1,5 +1,5 @@
 import Architecture from "@/components/Architecture";
-import { Nav } from "@/components/Chrome";
+import { Backdrop, CursorGlow, Intro, Nav } from "@/components/Chrome";
 import Dashboard from "@/components/Dashboard";
 import Hero from "@/components/Hero";
 import Projects from "@/components/Projects";
@@ -13,8 +13,11 @@ export default async function Home() {
   const stats = await getAllStats();
   return (
     <>
+      <Intro />
+      <Backdrop />
+      <CursorGlow />
       <Nav />
-      <main>
+      <main className="relative z-10">
         <Hero />
         <Dashboard stats={stats} />
         <Projects />

@@ -2,61 +2,65 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { projects } from "@/lib/data";
-import { Card, Icons, Reveal, SectionHeading } from "./ui";
+import { Icons, Reveal, SectionHeading, TiltCard } from "./ui";
 
 export default function Projects() {
   return (
-    <section id="work" className="border-t border-line">
-      <div className="mx-auto max-w-[1120px] px-6 py-24 md:px-12 md:py-32">
-        <SectionHeading label="Selected work" title="Things I've built." />
-        <div className="grid gap-4 lg:grid-cols-2">
+    <section id="work" className="relative px-6 py-32 md:px-12">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading eyebrow="02 / Selected work" title="Things I've built." sub="Pipelines, payments and retrieval: systems with numbers behind them." />
+        <div className="grid gap-6 lg:grid-cols-2">
           {projects.map((p, i) => (
-            <Reveal key={p.name} delay={i * 0.06}>
-              <Card className="group flex h-full flex-col p-6 transition-colors hover:border-line-strong md:p-8">
-                <div className="flex items-start justify-between gap-4">
+            <Reveal key={p.name} delay={i * 0.12}>
+              <TiltCard className="h-full overflow-hidden p-8 md:p-10" glow={`color-mix(in srgb, ${p.accent} 25%, transparent)`} intensity={7}>
+                <div
+                  className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-50 transition-opacity duration-700 group-hover:opacity-90"
+                  style={{ background: `radial-gradient(circle, color-mix(in srgb, ${p.accent} 30%, transparent) 0%, transparent 65%)` }}
+                />
+                <div className="relative flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-mono text-xs text-faint">{p.period}</p>
-                    <h3 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-ink">{p.name}</h3>
+                    <p className="font-mono text-xs uppercase tracking-widest text-ink/40">{p.period}</p>
+                    <h3 className="mt-2 text-4xl font-semibold tracking-tight text-ink">{p.name}</h3>
                   </div>
                   <a
                     href={p.url}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`${p.name} source on GitHub`}
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-muted transition-colors hover:border-line-strong hover:text-ink"
+                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-ink/15 bg-ink/5 text-ink transition hover:bg-ink hover:text-bg"
+                    aria-label={`${p.name} on GitHub`}
                   >
-                    <Icons.github className="h-4 w-4" />
+                    <Icons.github className="h-5 w-5" />
                   </a>
                 </div>
-                <p className="mt-3 leading-relaxed text-muted">{p.summary}</p>
+                <p className="relative mt-4 text-lg leading-relaxed text-ink/60">{p.summary}</p>
 
-                <div className="mt-8 flex items-baseline gap-3 border-y border-line py-5">
-                  <span className="text-4xl font-semibold tracking-[-0.03em] text-accent">{p.metric.value}</span>
-                  <span className="text-sm text-muted">{p.metric.label}</span>
+                <div className="relative my-8 flex items-baseline gap-3">
+                  <span className="text-6xl font-semibold tracking-tight" style={{ color: p.accent }}>
+                    {p.metric.value}
+                  </span>
+                  <span className="text-ink/50">{p.metric.label}</span>
                 </div>
 
-                <ul className="mt-6 space-y-3 text-[0.95rem] leading-relaxed text-ink/85">
+                <ul className="relative space-y-3">
                   {p.highlights.map((h) => (
-                    <li key={h} className="flex gap-3">
-                      <span className="mt-[0.7em] h-px w-3 shrink-0 bg-faint" />
+                    <li key={h} className="flex gap-3 text-ink/70">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: p.accent }} />
                       {h}
                     </li>
                   ))}
                 </ul>
 
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-8">
-                  <ul className="flex flex-wrap gap-1.5">
-                    {p.tech.map((t) => (
-                      <li key={t} className="rounded-md bg-subtle px-2 py-1 font-mono text-xs text-muted">
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
-                  <a href={p.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-accent">
-                    Source <ArrowUpRight className="h-4 w-4" />
-                  </a>
+                <div className="relative mt-8 flex flex-wrap gap-2">
+                  {p.tech.map((t) => (
+                    <span key={t} className="rounded-full border border-ink/10 bg-ink/5 px-3 py-1 font-mono text-xs text-ink/70">
+                      {t}
+                    </span>
+                  ))}
                 </div>
-              </Card>
+                <a href={p.url} target="_blank" rel="noreferrer" className="relative mt-8 inline-flex items-center gap-1 text-sm text-ink/60 hover:text-ink">
+                  View source <ArrowUpRight className="h-4 w-4" />
+                </a>
+              </TiltCard>
             </Reveal>
           ))}
         </div>

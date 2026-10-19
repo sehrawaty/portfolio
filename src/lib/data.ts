@@ -48,7 +48,7 @@ export const projects: Project[] = [
     ],
     metric: { value: "94%", label: "smaller RAG context" },
     url: "https://github.com/sehrawaty/smart-statement-analyzer",
-    accent: "#7c5cff",
+    accent: "var(--accent)",
   },
   {
     name: "SecurePay",
@@ -63,7 +63,7 @@ export const projects: Project[] = [
     ],
     metric: { value: "70%", label: "fewer payment timeouts" },
     url: "https://github.com/sehrawaty/mobile-payment-app",
-    accent: "#22d3ee",
+    accent: "var(--accent-2)",
   },
 ];
 
