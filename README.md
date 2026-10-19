@@ -1,48 +1,22 @@
 # yashsehrawat.in
 
-Personal portfolio — [yashsehrawat.in](https://yashsehrawat.in)
+Personal dashboard for Yash Sehrawat: a 3D, animated single page with live coding stats.
 
-Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 · static export, no server runtime.
+- **Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 · React Three Fiber + drei · Framer Motion
+- **3D:** liquid core orb with orbiting rings, a shader-driven particle galaxy that reacts to cursor and scroll, and a draggable skills sphere
+- **Live data:** LeetCode (GraphQL), Codeforces (public API) and GitHub (REST), fetched on the server and revalidated hourly (ISR). Each source falls back to cached values if it is unreachable.
 
-## Development
+## Run locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
-npm run build    # static export to /out
-npm run lint
+npm run dev   # http://localhost:3000
 ```
 
-Stop the dev server before running `npm run build` — both write to `.next`, and
-running them concurrently corrupts the dev server's webpack chunks.
+## Edit content
 
-## Structure
+All copy lives in `src/lib/data.ts` (profile, links, projects, experience, skills, certifications, education). Live stats logic is in `src/lib/stats.ts`.
 
-```
-app/          routes, layout, global styles, generated og-image
-components/   one component per file
-content/      all copy, typed — nothing hardcoded in JSX
-public/       resume PDF, favicon
-```
+## Deploy
 
-Content lives in `content/` as typed data. Updating a project, certification,
-or role never requires touching a component.
-
-## Design tokens
-
-Defined once in `app/globals.css` and referenced everywhere; no hex values in
-components. One accent color, hairline borders, no shadows. Dark mode ships via
-`prefers-color-scheme`.
-
-Two tokens exist for accessibility rather than aesthetics:
-
-- `--accent` (`#0066CC`) for text links, separate from `--accent-fill`
-  (`#0071E3`) for solid buttons. The single-value original measured 4.58:1,
-  passing WCAG AA with almost no margin.
-- `--line-input` for form and control boundaries, because `--line` is ~1.3:1
-  and fails WCAG 1.4.11's 3:1 minimum for non-text UI.
-
-## Deployment
-
-Push to `main` → Vercel auto-deploys. Domain registered at GoDaddy with DNS
-pointed at Vercel.
+Push to `main`; Vercel builds it automatically. Optional env var `GITHUB_TOKEN` (a read-only token) raises the GitHub API rate limit.
