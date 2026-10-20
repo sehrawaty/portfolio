@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  animate,
-  motion,
-  useInView,
-  useMotionTemplate,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { animate, motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export function Reveal({
@@ -35,62 +27,19 @@ export function Reveal({
   );
 }
 
-export function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+/** Section title in the streaming style: a red eyebrow with a rule, then a big condensed title card. */
+export function SeriesHeading({ eyebrow, title, aside }: { eyebrow: string; title: string; aside?: ReactNode }) {
   return (
-    <Reveal className="mb-12 max-w-2xl">
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-accent2/80">{eyebrow}</p>
-      <h2 className="text-4xl font-semibold tracking-tight text-ink md:text-5xl">
-        <span className="text-gradient">{title}</span>
-      </h2>
-      {sub && <p className="mt-4 text-lg text-ink/55">{sub}</p>}
-    </Reveal>
-  );
-}
-
-/** Card that tilts in 3D toward the cursor and paints a moving spotlight. */
-export function TiltCard({
-  children,
-  className = "",
-  intensity = 10,
-  glow = "color-mix(in srgb, var(--accent) 22%, transparent)",
-}: {
-  children: ReactNode;
-  className?: string;
-  intensity?: number;
-  glow?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const mx = useMotionValue(0.5);
-  const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [intensity, -intensity]), { stiffness: 200, damping: 20 });
-  const ry = useSpring(useTransform(mx, [0, 1], [-intensity, intensity]), { stiffness: 200, damping: 20 });
-  const gx = useTransform(mx, (v) => `${v * 100}%`);
-  const gy = useTransform(my, (v) => `${v * 100}%`);
-  const background = useMotionTemplate`radial-gradient(500px circle at ${gx} ${gy}, ${glow}, transparent 45%)`;
-
-  return (
-    <motion.div
-      ref={ref}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        mx.set((e.clientX - r.left) / r.width);
-        my.set((e.clientY - r.top) / r.height);
-      }}
-      onPointerLeave={() => {
-        mx.set(0.5);
-        my.set(0.5);
-      }}
-      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
-      className={`group relative rounded-3xl border border-ink/10 bg-surface transition-colors hover:border-ink/20 ${className}`}
-    >
-      <motion.div
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background }}
-      />
-      <div className="relative h-full" style={{ transform: "translateZ(30px)" }}>
-        {children}
+    <Reveal className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p className="mb-2 flex items-center gap-3 font-display text-sm tracking-[0.3em] text-accent md:text-base">
+          <span className="block h-[3px] w-8 bg-accent" aria-hidden />
+          {eyebrow}
+        </p>
+        <h2 className="title-card text-[3.4rem] uppercase text-ink sm:text-7xl md:text-8xl">{title}</h2>
       </div>
-    </motion.div>
+      {aside && <div className="max-w-xs text-sm text-muted md:text-right">{aside}</div>}
+    </Reveal>
   );
 }
 
@@ -108,30 +57,6 @@ export function Counter({ value, decimals = 0, suffix = "" }: { value: number; d
       {display.toFixed(decimals)}
       {suffix}
     </span>
-  );
-}
-
-export function Magnetic({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useSpring(0, { stiffness: 250, damping: 15 });
-  const y = useSpring(0, { stiffness: 250, damping: 15 });
-  return (
-    <motion.div
-      ref={ref}
-      className={`inline-block ${className}`}
-      style={{ x, y }}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
-        y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
-      }}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
-      {children}
-    </motion.div>
   );
 }
 
