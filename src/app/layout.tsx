@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import "@fontsource/bebas-neue/latin-400.css";
+import "@fontsource/instrument-serif/latin-400.css";
 import "./globals.css";
 import { links, profile } from "@/lib/data";
 import { themeScript } from "@/lib/theme";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://yashsehrawat.in"),
-  title: "Yash Sehrawat — Backend Engineer",
+  title: "Yash: The Series · Yash Sehrawat, Backend Engineer",
   description:
     "Backend engineer building APIs, authentication systems, and applied-AI pipelines. Final-year CS student at VIT Vellore. Live LeetCode, Codeforces and GitHub stats.",
   alternates: { canonical: "/" },
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Yash Sehrawat — Backend Engineer" },
 };
 
-export const viewport: Viewport = { themeColor: "#0b0b0c" };
+export const viewport: Viewport = { themeColor: "#111015" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
