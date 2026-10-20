@@ -140,24 +140,33 @@ function IntroLayer({
 }
 
 function Splash({ onPlay, onSkip }: { onPlay: () => void; onSkip: () => void }) {
-  const letters = series.title.toUpperCase().split("");
+  const words = series.title.toUpperCase().split(" ");
   return (
     <motion.div
       className="relative flex min-h-full flex-col items-center justify-center px-4 py-16 text-center"
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.45, ease }}
     >
-      <h1 className="title-card flex text-[34vw] text-ink sm:text-[13rem] md:text-[16rem]" aria-label={series.title}>
-        {letters.map((l, i) => (
-          <motion.span
-            key={i}
-            initial={{ opacity: 0, y: 40, scale: 1.25 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1, delay: 0.15 + i * 0.09, ease }}
-            aria-hidden
-          >
-            {l}
-          </motion.span>
+      <h1
+        className="title-card flex flex-col items-center gap-x-[0.22em] text-[22vw] text-ink sm:text-[7rem] md:flex-row md:text-[8.5rem] lg:text-[10.5rem]"
+        aria-label={series.title}
+      >
+        {words.map((word, w) => (
+          <span key={word} className="flex" aria-hidden>
+            {word.split("").map((l, i) => {
+              const n = words.slice(0, w).join("").length + i;
+              return (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 40, scale: 1.25 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 1, delay: 0.15 + n * 0.06, ease }}
+                >
+                  {l}
+                </motion.span>
+              );
+            })}
+          </span>
         ))}
       </h1>
       <motion.div

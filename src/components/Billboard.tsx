@@ -95,9 +95,13 @@ export function Billboard() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.25, ease }}
-            className="title-card name-sweep text-[34vw] uppercase sm:text-[12rem] md:text-[13rem] xl:text-[15rem]"
+            className="title-card name-sweep text-[22vw] uppercase sm:text-[8.5rem] md:text-[9rem] xl:text-[11rem]"
           >
-            {series.title}
+            {series.title.split(" ").map((word) => (
+              <span key={word} className="block">
+                {word}
+              </span>
+            ))}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, letterSpacing: "0.1em" }}

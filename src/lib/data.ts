@@ -172,7 +172,7 @@ export const beyond = [
 export const portrait: string | null = null;
 
 export const series = {
-  title: "Yash",
+  title: "Yash Sehrawat",
   badge: "Backend",
   years: "2023 — Present",
   degree: "B.Tech CSE · VIT",
