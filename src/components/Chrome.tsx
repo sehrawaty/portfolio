@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useScroll, useSpring } from "framer-motion";
-import { ChevronDown, Moon, Play, Sun } from "lucide-react";
+import { ChevronDown, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSeries } from "./Series";
 
@@ -154,14 +154,12 @@ function Controls({ profileGlyph, tile, onProfile }: { profileGlyph: string; til
   );
 }
 
-/** A small ring that follows the pointer and turns into a red play button over anything clickable. */
+/** A rounded arrowhead pointer with a soft white glow behind it; it grows a little over anything clickable. */
 export function Cursor() {
   const [on, setOn] = useState(false);
   const [hot, setHot] = useState(false);
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const sx = useSpring(x, { stiffness: 600, damping: 40 });
-  const sy = useSpring(y, { stiffness: 600, damping: 40 });
 
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches;
@@ -188,20 +186,29 @@ export function Cursor() {
   }, [x, y]);
 
   if (!on) return null;
+  // The arrow's tip sits at (3, 3) in its 32px box, so the box is offset to put the tip on the pointer.
   return (
-    <motion.div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[100]" style={{ x: sx, y: sy }}>
+    <motion.div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[100]" style={{ x, y }}>
       <motion.div
-        className="grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
-        animate={
-          hot
-            ? { width: 40, height: 40, backgroundColor: "var(--accent)", borderColor: "var(--accent)" }
-            : { width: 26, height: 26, backgroundColor: "transparent", borderColor: "var(--muted)" }
-        }
-        style={{ borderWidth: 2, borderStyle: "solid", boxShadow: hot ? "0 0 24px rgba(var(--glow),0.6)" : "none" }}
+        className="absolute -left-[22px] -top-[22px] h-14 w-14 rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(var(--cursor-glow), 0.55), rgba(var(--cursor-glow), 0.18) 40%, transparent 70%)" }}
+        animate={{ scale: hot ? 1.35 : 1, opacity: hot ? 1 : 0.8 }}
+        transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      />
+      <motion.svg
+        viewBox="0 0 32 32"
+        className="absolute -left-[3px] -top-[3px] h-8 w-8 origin-top-left"
+        animate={{ scale: hot ? 1.15 : 1 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       >
-        {hot && <Play className="ml-0.5 h-3.5 w-3.5 fill-white text-white" />}
-      </motion.div>
+        <path
+          d="M5 5 L27 12.5 L17.5 16.5 L13 27 Z"
+          fill="var(--cursor-ink)"
+          stroke="var(--cursor-ink)"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+      </motion.svg>
     </motion.div>
   );
 }
