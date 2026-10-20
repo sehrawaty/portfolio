@@ -29,6 +29,9 @@
   --poster-green: #2a7d4f;
   --poster-ink: #ffffff;
   --poster-shade: #07060a;
+  /* The pointer is a black arrow in both themes; the white glow keeps it visible on the dark stage. */
+  --cursor-ink: #0a090d;
+  --cursor-glow: 255, 255, 255;
   color-scheme: dark;
 }
 
