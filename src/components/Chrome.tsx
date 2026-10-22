@@ -1,19 +1,19 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useScroll, useSpring } from "framer-motion";
-import { ChevronDown, Moon, Sun } from "lucide-react";
+import dynamic from "next/dynamic";
+import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSeries } from "./Series";
 
-const links = [
-  ["top", "Home"],
-  ["originals", "Originals"],
-  ["moments", "Moments"],
+const Scene = dynamic(() => import("./three/Scene"), { ssr: false });
+
+const sections = [
+  ["dashboard", "Dashboard"],
+  ["work", "Work"],
+  ["experience", "Experience"],
   ["skills", "Skills"],
-  ["about", "About"],
-  ["journey", "Journey"],
-  ["picks", "Top Picks"],
-  ["stats", "Box Office"],
+  ["credentials", "Credentials"],
+  ["contact", "Contact"],
 ] as const;
 
 type Theme = "light" | "dark";
@@ -36,7 +36,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="relative grid h-9 w-9 place-items-center overflow-hidden rounded-full text-ink/75 transition-colors hover:bg-ink/10 hover:text-ink"
+      className="relative grid h-9 w-9 place-items-center overflow-hidden rounded-full text-ink/70 transition-colors hover:bg-ink/10 hover:text-ink"
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.span
@@ -53,162 +53,126 @@ export function ThemeToggle() {
   );
 }
 
-export function Logo({ className = "" }: { className?: string }) {
-  return (
-    <span className={`inline-flex items-baseline gap-1.5 font-display leading-none ${className}`}>
-      <span className="text-[1.6em] text-accent">Y</span>
-      <span className="tracking-[0.35em] text-ink">SERIES</span>
-    </span>
-  );
-}
-
 export function Nav() {
-  const { profile, switchProfile } = useSeries();
-  const [active, setActive] = useState("top");
-  const [solid, setSolid] = useState(false);
+  const [active, setActive] = useState<string>("");
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 25 });
 
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
     const obs = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
       { rootMargin: "-45% 0px -50% 0px" },
     );
-    links.forEach(([id]) => {
+    sections.forEach(([id]) => {
       const el = document.getElementById(id);
       if (el) obs.observe(el);
     });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      obs.disconnect();
-    };
+    return () => obs.disconnect();
   }, []);
 
   return (
     <>
-      <motion.div className="fixed inset-x-0 top-0 z-50 h-[2px] origin-left bg-accent" style={{ scaleX: progress }} />
-      <header
-        className={`fixed inset-x-0 top-0 z-40 transition-colors duration-500 ${solid ? "bg-bg shadow-lg shadow-black/20" : ""}`}
-        style={solid ? undefined : { background: "linear-gradient(to bottom, rgba(var(--shade),0.85), transparent)" }}
+      <motion.div className="fixed inset-x-0 top-0 z-50 h-[2px] origin-left bg-gradient-to-r from-accent2 via-accent to-accent3" style={{ scaleX: progress }} />
+      <motion.header
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed inset-x-0 top-5 z-40 flex justify-center px-4"
       >
-        <nav className="mx-auto flex max-w-[1500px] flex-col gap-2 px-4 pb-2 pt-3 md:flex-row md:items-center md:gap-8 md:px-10 md:py-4">
-          <div className="flex items-center justify-between">
-            <a href="#top" aria-label="Back to the top" className="text-lg">
-              <Logo />
+        <nav className="flex items-center gap-1 rounded-full border border-ink/10 bg-surface-solid/85 p-1.5 shadow-xl shadow-black/10 dark:shadow-black/40">
+          <a href="#top" className="mr-1 grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-accent to-accent3 text-sm font-bold text-white">
+            YS
+          </a>
+          {sections.map(([id, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className={`relative hidden rounded-full px-4 py-2 text-sm transition-colors sm:block ${active === id ? "text-ink" : "text-ink/55 hover:text-ink"}`}
+            >
+              {active === id && (
+                <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-ink/10" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+              )}
+              <span className="relative">{label}</span>
             </a>
-            <div className="flex items-center gap-1 md:hidden">
-              <Controls profileGlyph={profile.glyph} tile={profile.tile} onProfile={switchProfile} />
-            </div>
-          </div>
-          <ul className="no-scrollbar -mx-4 flex gap-5 overflow-x-auto px-4 text-sm md:mx-0 md:px-0">
-            {links.map(([id, label]) => (
-              <li key={id} className="shrink-0">
-                <a
-                  href={`#${id}`}
-                  className={`relative block py-1 transition-colors ${active === id ? "font-semibold text-ink" : "text-ink/70 hover:text-ink"}`}
-                >
-                  {label}
-                  {active === id && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute inset-x-0 -bottom-0.5 h-[2px] bg-accent"
-                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                    />
-                  )}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <div className="ml-auto hidden items-center gap-2 md:flex">
-            <Controls profileGlyph={profile.glyph} tile={profile.tile} onProfile={switchProfile} />
-          </div>
+          ))}
+          <a href="#contact" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg sm:hidden">
+            Contact
+          </a>
+          <span className="mx-1 h-5 w-px bg-ink/10" />
+          <ThemeToggle />
         </nav>
-      </header>
+      </motion.header>
     </>
   );
 }
 
-function Controls({ profileGlyph, tile, onProfile }: { profileGlyph: string; tile: string; onProfile: () => void }) {
-  return (
-    <>
-      <a
-        href="#contact"
-        className="hidden font-display text-base tracking-[0.2em] text-ink/80 transition hover:text-accent sm:block"
-      >
-        Let&apos;s build
-      </a>
-      <ThemeToggle />
-      <button type="button" onClick={onProfile} aria-label="Switch viewer profile" className="group flex items-center gap-1">
-        <span
-          className="grid h-8 w-8 place-items-center rounded font-display text-sm text-poster-ink"
-          style={{ background: `linear-gradient(145deg, ${tile}, color-mix(in srgb, ${tile} 45%, var(--poster-shade)))` }}
-        >
-          {profileGlyph}
-        </span>
-        <ChevronDown className="h-3.5 w-3.5 text-ink/70 transition group-hover:rotate-180" />
-      </button>
-    </>
-  );
-}
-
-/** A rounded arrowhead pointer with a soft white glow behind it; it grows a little over anything clickable. */
-export function Cursor() {
-  const [on, setOn] = useState(false);
-  const [hot, setHot] = useState(false);
-  const x = useMotionValue(-100);
-  const y = useMotionValue(-100);
-
+/** Fixed 3D background. Skipped when WebGL is missing; calmer when reduced motion is set. */
+export function Backdrop() {
+  const [ok, setOk] = useState(false);
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!fine || calm) return;
-    setOn(true);
-    document.documentElement.dataset.cursor = "1";
+    try {
+      const c = document.createElement("canvas");
+      setOk(!!(c.getContext("webgl2") || c.getContext("webgl")));
+    } catch {
+      setOk(false);
+    }
+  }, []);
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--halo)_0%,var(--bg)_55%,var(--bg-deep)_100%)]" />
+      {ok && (
+        <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2 }}>
+          <Scene />
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+export function CursorGlow() {
+  const x = useSpring(-500, { stiffness: 150, damping: 25 });
+  const y = useSpring(-500, { stiffness: 150, damping: 25 });
+  useEffect(() => {
     const move = (e: PointerEvent) => {
-      x.set(e.clientX);
-      y.set(e.clientY);
-      setHot(!!(e.target as Element | null)?.closest?.("a, button"));
-    };
-    const leave = () => {
-      x.set(-100);
-      y.set(-100);
+      x.set(e.clientX - 200);
+      y.set(e.clientY - 200);
     };
     window.addEventListener("pointermove", move);
-    document.addEventListener("pointerleave", leave);
-    return () => {
-      delete document.documentElement.dataset.cursor;
-      window.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerleave", leave);
-    };
+    return () => window.removeEventListener("pointermove", move);
   }, [x, y]);
-
-  if (!on) return null;
-  // The arrow's tip sits at (3, 3) in its 32px box, so the box is offset to put the tip on the pointer.
   return (
-    <motion.div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[100]" style={{ x, y }}>
-      <motion.div
-        className="absolute -left-[22px] -top-[22px] h-14 w-14 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(var(--cursor-glow), 0.55), rgba(var(--cursor-glow), 0.18) 40%, transparent 70%)" }}
-        animate={{ scale: hot ? 1.35 : 1, opacity: hot ? 1 : 0.8 }}
-        transition={{ type: "spring", stiffness: 400, damping: 28 }}
-      />
-      <motion.svg
-        viewBox="0 0 32 32"
-        className="absolute -left-[3px] -top-[3px] h-8 w-8 origin-top-left"
-        animate={{ scale: hot ? 1.15 : 1 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-      >
-        <path
-          d="M5 5 L27 12.5 L17.5 16.5 L13 27 Z"
-          fill="var(--cursor-ink)"
-          stroke="var(--cursor-ink)"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-      </motion.svg>
-    </motion.div>
+    <motion.div
+      aria-hidden
+      className="pointer-events-none fixed left-0 top-0 z-0 hidden h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_12%,transparent)_0%,transparent_65%)] md:block"
+      style={{ x, y }}
+    />
+  );
+}
+
+export function Intro() {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setDone(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <AnimatePresence>
+      {!done && (
+        <motion.div
+          className="fixed inset-0 z-[100] grid place-items-center bg-bg"
+          exit={{ clipPath: "inset(0 0 100% 0)" }}
+          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <div className="text-center">
+            <motion.div
+              className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-accent via-accent3 to-accent2"
+              animate={{ rotate: [0, 90, 180, 270, 360], borderRadius: ["20%", "50%", "20%", "50%", "20%"] }}
+              transition={{ duration: 1.4, ease: "easeInOut" }}
+            />
+            <p className="mt-6 font-mono text-xs uppercase tracking-[0.4em] text-ink/50">Booting yashsehrawat.in</p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

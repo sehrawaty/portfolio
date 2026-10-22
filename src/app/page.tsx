@@ -1,7 +1,9 @@
-import { ContinueRow, Billboard } from "@/components/Billboard";
-import { Cursor, Nav } from "@/components/Chrome";
-import { BoxOffice, Finale, Journey, Moments, Originals, Pilot, SkillUniverse, TopPicks } from "@/components/Sections";
-import { SeriesProvider, SeriesSections } from "@/components/Series";
+import Architecture from "@/components/Architecture";
+import { Backdrop, CursorGlow, Intro, Nav } from "@/components/Chrome";
+import Dashboard from "@/components/Dashboard";
+import Hero from "@/components/Hero";
+import Projects from "@/components/Projects";
+import { Background, Contact, Credentials, Experience, Skills } from "@/components/Sections";
 import { getAllStats } from "@/lib/stats";
 
 // Rebuild the page (and re-pull live stats) at most once an hour.
@@ -10,25 +12,22 @@ export const revalidate = 3600;
 export default async function Home() {
   const stats = await getAllStats();
   return (
-    <SeriesProvider>
-      <Cursor />
+    <>
+      <Intro />
+      <Backdrop />
+      <CursorGlow />
       <Nav />
-      <main className="relative">
-        <Billboard />
-        <ContinueRow />
-        <SeriesSections
-          sections={{
-            stats: <BoxOffice stats={stats} />,
-            moments: <Moments stats={stats} />,
-            skills: <SkillUniverse />,
-            originals: <Originals repos={stats.github.repos} />,
-            about: <Pilot />,
-            journey: <Journey />,
-            picks: <TopPicks />,
-          }}
-        />
-        <Finale />
+      <main className="relative z-10">
+        <Hero />
+        <Dashboard stats={stats} />
+        <Projects />
+        <Architecture />
+        <Experience />
+        <Skills />
+        <Credentials />
+        <Background />
+        <Contact />
       </main>
-    </SeriesProvider>
+    </>
   );
 }

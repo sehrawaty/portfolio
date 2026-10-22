@@ -2,23 +2,23 @@
 
 Personal dashboard for **Yash Sehrawat** at **yashsehrawat.in**. This replaced the earlier minimal portfolio in Oct 2026. There is no résumé section.
 
-Design direction (owner request, Oct 20 2026): "Yash: The Series", a streaming-app portfolio rebuilt from a reference video Yash sent. Opening title card with a Play button, a "Who's watching?" picker (Yash / Recruiter / Developer / Explorer) that reorders the sections, a billboard hero, a "Continue Exploring" episode row, then Box Office (live stats), Top Moments, Skill Universe, Originals, About (The Pilot), Journey (seasons), Top Picks and a "To be continued" contact finale. Palette: near-black stage, signal red, award gold, saturated poster gradients. Dark is the default; a toggle switches to light. The earlier R3F 3D scenes were removed for this design.
+Design direction (owner feedback, Oct 2026): keep the animated, 3D look (liquid orb, particle galaxy, skills sphere, tilt cards, counters, request-flow diagram). The owner rejected a plain minimal redesign. What changed was the palette: graphite + ember orange, with steel blue and gold as supporting accents, instead of the earlier purple/cyan/pink neon. Dark is the default; a toggle switches to light.
 
 ## Stack
 - Next.js 15 (App Router) + TypeScript, Tailwind CSS v4
-- Framer Motion for all motion. Display font Bebas Neue and serif Instrument Serif come from `@fontsource` packages (no runtime Google Fonts fetch).
-- Theme: tokens in `src/app/globals.css` (`:root`/`[data-theme=dark]`, `[data-theme=light]`), toggled by `ThemeToggle` in the nav, set before paint by `src/lib/theme.ts` (dark unless the visitor picked light). The same script sets `data-intro` when no viewer profile is stored in sessionStorage, which shows the opening overlay; without JS there is no overlay.
+- React Three Fiber + drei for 3D (`src/components/three/`); scenes read theme colors from CSS tokens via `three/palette.ts`. Framer Motion for UI motion.
+- Theme: tokens in `src/app/globals.css` (`:root` light, `[data-theme=dark]`), toggled by `ThemeToggle` in the nav, set before paint by `src/lib/theme.ts` (dark unless the visitor picked light).
 - Hosted on Vercel; auto-deploys from `main`. Not a static export: the home page uses ISR (`revalidate = 3600`) to refresh stats.
 
 ## Layout
-- `src/lib/data.ts`: all copy and links, typed. Change content here, never inside components. The "series" block at the bottom (viewer profiles, episodes, moments, seasons, top picks) is derived from the facts above it. `portrait` is null until Yash provides a photo; the hero and About card show a monogram until then.
+- `src/lib/data.ts`: all copy and links, typed. Change content here, never inside components.
 - `src/lib/stats.ts`: server-only fetchers for LeetCode (GraphQL), Codeforces and GitHub. Each source has its own fallback so one failing API never breaks the page.
-- `src/components/`: Series (profile context, opening splash, Who's watching, section ordering, toast), Billboard (hero + Continue Exploring row), Sections (Box Office, Top Moments, Skill Universe, Originals, Pilot, Journey, Top Picks, Finale), Chrome (nav, theme toggle, play cursor, logo), ui (Reveal, SeriesHeading, Counter, brand icons).
+- `src/components/`: Hero, Dashboard (live stats bento), Projects, Architecture (animated request-flow SVG), Sections (experience, skills sphere, credentials, background, contact), Chrome (nav, theme toggle, 3D backdrop, cursor glow, intro), ui (Reveal, TiltCard, Counter, Magnetic, brand icons).
 
 ## Rules
 - Never fabricate projects, metrics, dates or links. Missing info gets a `TODO:` and a question to the owner.
-- Keep the page fully readable without JavaScript (the overlay only appears when the head script runs).
+- Keep 3D heavy pieces client-only (`dynamic(..., { ssr: false })`) and keep the page usable without WebGL.
 - Respect `prefers-reduced-motion`. Avoid `backdrop-filter` and `filter: blur` (use radial gradients for soft glows); they caused scroll jank.
-- Colors only via tokens (`bg-bg`, `text-ink`, `text-muted`, `border-line`, `text-accent`, `var(--poster-*)`…), never hardcoded hex in components.
+- Colors only via tokens (`bg-bg`, `text-ink`, `text-muted`, `border-line`, `text-accent`…), never hardcoded hex in components.
 - Test at 390px and 1440px; no horizontal scroll.
 - Conventional commits (`feat:`, `fix:`, `style:`, `chore:`).
