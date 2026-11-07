@@ -1,137 +1,103 @@
 "use client";
 
-import {
-  animate,
-  motion,
-  useInView,
-  useMotionTemplate,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { animate, motion, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { fade, spring } from "@/lib/motion";
 
+/** Fades content up into place once. With reduced motion it only cross-fades. */
 export function Reveal({
   children,
   delay = 0,
   className = "",
-  y = 28,
+  as = "div",
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
-  y?: number;
+  as?: "div" | "li" | "section";
 }) {
+  const reduce = useReducedMotion();
+  const M = motion[as];
   return (
-    <motion.div
+    <M
       className={className}
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 0, y: reduce ? 0 : 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={reduce ? fade : { ...spring, duration: 0.6, delay }}
     >
       {children}
-    </motion.div>
+    </M>
   );
 }
 
-export function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+export function SectionHeader({
+  id,
+  kicker,
+  title,
+  sub,
+  className = "",
+}: {
+  id?: string;
+  kicker: string;
+  title: ReactNode;
+  sub?: string;
+  className?: string;
+}) {
   return (
-    <Reveal className="mb-12 max-w-2xl">
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.3em] text-accent2/80">{eyebrow}</p>
-      <h2 className="text-4xl font-semibold tracking-tight text-ink md:text-5xl">
-        <span className="text-gradient">{title}</span>
-      </h2>
-      {sub && <p className="mt-4 text-lg text-ink/55">{sub}</p>}
+    <Reveal className={`mb-10 max-w-3xl md:mb-14 ${className}`}>
+      <p className="t-headline text-accent-ink" id={id}>
+        {kicker}
+      </p>
+      <h2 className="t-title1 mt-2 text-ink">{title}</h2>
+      {sub && <p className="t-lead mt-4 max-w-2xl text-muted">{sub}</p>}
     </Reveal>
   );
 }
 
-/** Card that tilts in 3D toward the cursor and paints a moving spotlight. */
-export function TiltCard({
-  children,
-  className = "",
-  intensity = 10,
-  glow = "color-mix(in srgb, var(--accent) 22%, transparent)",
-}: {
-  children: ReactNode;
-  className?: string;
-  intensity?: number;
-  glow?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const mx = useMotionValue(0.5);
-  const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [intensity, -intensity]), { stiffness: 200, damping: 20 });
-  const ry = useSpring(useTransform(mx, [0, 1], [-intensity, intensity]), { stiffness: 200, damping: 20 });
-  const gx = useTransform(mx, (v) => `${v * 100}%`);
-  const gy = useTransform(my, (v) => `${v * 100}%`);
-  const background = useMotionTemplate`radial-gradient(500px circle at ${gx} ${gy}, ${glow}, transparent 45%)`;
-
-  return (
-    <motion.div
-      ref={ref}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        mx.set((e.clientX - r.left) / r.width);
-        my.set((e.clientY - r.top) / r.height);
-      }}
-      onPointerLeave={() => {
-        mx.set(0.5);
-        my.set(0.5);
-      }}
-      style={{ rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
-      className={`group relative rounded-3xl border border-ink/10 bg-surface transition-colors hover:border-ink/20 ${className}`}
-    >
-      <motion.div
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{ background }}
-      />
-      <div className="relative h-full" style={{ transform: "translateZ(30px)" }}>
-        {children}
-      </div>
-    </motion.div>
-  );
-}
-
-export function Counter({ value, decimals = 0, suffix = "" }: { value: number; decimals?: number; suffix?: string }) {
+/** Counts up once when visible. Shows the final value immediately when motion is reduced. */
+export function Counter({ value, decimals = 0 }: { value: number; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const [display, setDisplay] = useState(0);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const reduce = useReducedMotion();
+  const [display, setDisplay] = useState(value);
+  const started = useRef(false);
+
   useEffect(() => {
-    if (!inView) return;
-    const c = animate(0, value, { duration: 1.8, ease: [0.22, 1, 0.36, 1], onUpdate: setDisplay });
+    if (reduce || started.current) return;
+    if (!inView) {
+      setDisplay(0);
+      return;
+    }
+    started.current = true;
+    const c = animate(0, value, { type: "spring", bounce: 0, duration: 1.4, onUpdate: setDisplay });
     return () => c.stop();
-  }, [inView, value]);
+  }, [inView, value, reduce]);
+
   return (
     <span ref={ref} className="tabular-nums">
-      {display.toFixed(decimals)}
-      {suffix}
+      {display.toLocaleString("en-IN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
     </span>
   );
 }
 
-export function Magnetic({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useSpring(0, { stiffness: 250, damping: 15 });
-  const y = useSpring(0, { stiffness: 250, damping: 15 });
+export function Chip({
+  children,
+  tone = "neutral",
+  size = "sm",
+}: {
+  children: ReactNode;
+  tone?: "neutral" | "accent";
+  size?: "sm" | "md";
+}) {
   return (
-    <motion.div
-      ref={ref}
-      className={`inline-block ${className}`}
-      style={{ x, y }}
-      onPointerMove={(e) => {
-        const r = ref.current!.getBoundingClientRect();
-        x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
-        y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
-      }}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
+    <span
+      className={`inline-flex items-center rounded-full ${size === "md" ? "t-callout px-3.5 py-1.5" : "t-caption px-3 py-1"} ${
+        tone === "accent" ? "bg-accent/12 text-accent-ink" : "bg-surface2 text-muted"
+      }`}
     >
       {children}
-    </motion.div>
+    </span>
   );
 }
 

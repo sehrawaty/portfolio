@@ -1,55 +1,65 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, BadgeCheck, Crown, Heart, Mail, Shield, Target } from "lucide-react";
-import { useRef } from "react";
+import { ArrowUpRight, BadgeCheck, ChevronRight, Crown, Heart, Mail, Shield, Target } from "lucide-react";
 import { beyond, certifications, education, experience, links, profile, skills } from "@/lib/data";
-import { Icons, Magnetic, Reveal, SectionHeading, TiltCard } from "./ui";
-
-const SkillSphere = dynamic(() => import("./three/SkillSphere"), { ssr: false });
+import { Chip, Icons, Reveal, SectionHeader } from "./ui";
 
 export function Experience() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 80%", "end 60%"] });
-  const height = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-
   return (
-    <section id="experience" className="relative px-6 py-32 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading eyebrow="04 / Experience" title="Where I've worked." />
-        <div ref={ref} className="relative pl-10 md:pl-16">
-          <div className="absolute left-3 top-0 h-full w-px bg-ink/10 md:left-6" />
-          <motion.div className="absolute left-3 top-0 w-px bg-gradient-to-b from-accent2 via-accent to-accent3 md:left-6" style={{ height }} />
-          {experience.map((e) => (
-            <Reveal key={e.company} className="relative">
-              <span className="absolute -left-[34px] top-2 h-4 w-4 rounded-full border-2 border-accent2 bg-bg shadow-[0_0_16px_var(--accent-2)] md:-left-[46px]" />
-              <TiltCard intensity={3} className="p-8">
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-ink">{e.role}</h3>
-                    <p className="mt-1 text-lg text-accent2/80">{e.company}</p>
-                  </div>
-                  <p className="font-mono text-sm text-ink/40">
-                    {e.period} · {e.mode}
-                  </p>
-                </div>
-                <ul className="mt-6 space-y-3">
-                  {e.points.map((p) => (
-                    <li key={p} className="flex gap-3 text-ink/65">
-                      <span className="mt-2.5 h-1 w-3 shrink-0 rounded-full bg-accent" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {e.stack.map((s) => (
-                    <span key={s} className="rounded-full bg-accent/10 px-3 py-1 font-mono text-xs text-accent">
+    <section id="experience" className="scroll-mt-20 px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeader kicker="Experience" title="Where I've worked." />
+        {experience.map((e) => (
+          <Reveal key={e.company} className="card grid gap-8 p-7 md:grid-cols-[1fr_1.6fr] md:gap-12 md:p-10">
+            <div>
+              <p className="t-caption text-muted">
+                {e.period} · {e.mode}
+              </p>
+              <h3 className="t-title2 mt-2 text-ink">{e.role}</h3>
+              <p className="t-callout mt-1 text-accent-ink">{e.company}</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {e.stack.map((s) => (
+                  <Chip key={s}>{s}</Chip>
+                ))}
+              </div>
+            </div>
+            <ul className="divide-y divide-line">
+              {e.points.map((p) => (
+                <li key={p} className="flex gap-3 py-4 text-ink first:pt-0 last:pb-0">
+                  <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  <span className="text-muted">{p}</span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function Skills() {
+  return (
+    <section id="skills" className="scroll-mt-20 px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeader kicker="Toolkit" title="What I work with." />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {skills.map((g, i) => (
+            <Reveal key={g.group} delay={i * 0.04} className={`card p-6 ${i === 0 ? "lg:row-span-2" : ""}`}>
+              <h3 className="t-headline text-ink">{g.group}</h3>
+              <ul className={`mt-4 ${i === 0 ? "grid grid-cols-2 gap-x-4 lg:grid-cols-1" : "flex flex-wrap gap-2"}`}>
+                {g.items.map((s) =>
+                  i === 0 ? (
+                    <li key={s} className="t-title3 border-b border-line py-2.5 text-ink last:border-0 lg:text-[1.5rem]">
                       {s}
-                    </span>
-                  ))}
-                </div>
-              </TiltCard>
+                    </li>
+                  ) : (
+                    <li key={s}>
+                      <Chip size="md">{s}</Chip>
+                    </li>
+                  ),
+                )}
+              </ul>
             </Reveal>
           ))}
         </div>
@@ -58,70 +68,47 @@ export function Experience() {
   );
 }
 
-export function Skills() {
-  const words = skills.flatMap((s) => s.items);
-  return (
-    <section id="skills" className="relative px-6 py-32 md:px-12">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
-        <div>
-          <SectionHeading eyebrow="05 / Toolkit" title="What I work with." sub="Drag the sphere. Hover a word." />
-          <div className="space-y-6">
-            {skills.map((g, i) => (
-              <Reveal key={g.group} delay={i * 0.06}>
-                <p className="mb-2 font-mono text-xs uppercase tracking-widest text-ink/40">{g.group}</p>
-                <div className="flex flex-wrap gap-2">
-                  {g.items.map((s) => (
-                    <motion.span
-                      key={s}
-                      whileHover={{ y: -3, scale: 1.05 }}
-                      className="cursor-default rounded-xl border border-ink/10 bg-ink/[0.04] px-3.5 py-1.5 text-sm text-ink/80 transition-colors hover:border-accent2/40 hover:text-ink"
-                    >
-                      {s}
-                    </motion.span>
-                  ))}
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-        <Reveal className="relative aspect-square w-full cursor-grab active:cursor-grabbing">
-          <div className="absolute inset-[15%] rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_18%,transparent)_0%,transparent_70%)]" />
-          <SkillSphere words={words} />
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 export function Credentials() {
+  const groups = Array.from(new Set(certifications.map((c) => c.group)));
   return (
-    <section id="credentials" className="relative px-6 py-32 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading eyebrow="06 / Credentials" title="Verified, not claimed." sub="Each badge links to its public verification page." />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {certifications.map((c, i) => (
-            <Reveal key={c.name} delay={i * 0.06}>
-              <a href={c.url} target="_blank" rel="noreferrer" className="block h-full">
-                <TiltCard className="h-full p-6" glow={c.issuer === "Google Cloud" ? "color-mix(in srgb, var(--accent-2) 28%, transparent)" : "color-mix(in srgb, var(--accent) 25%, transparent)"}>
-                  <div className="flex items-start justify-between">
-                    <span
-                      className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-semibold ${
-                        c.issuer === "Google Cloud" ? "bg-accent2/15 text-accent2" : "bg-danger/15 text-danger"
-                      }`}
-                    >
-                      {c.issuer}
-                    </span>
-                    <BadgeCheck className="h-5 w-5 text-success" />
-                  </div>
-                  <h3 className="mt-6 text-lg font-medium leading-snug text-ink">{c.name}</h3>
-                  <div className="mt-6 flex items-center justify-between text-sm text-ink/40">
-                    <span>{c.group}</span>
-                    <span className="flex items-center gap-1 transition group-hover:text-ink">
-                      Verify <ArrowUpRight className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </TiltCard>
-              </a>
+    <section id="credentials" className="scroll-mt-20 px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeader kicker="Credentials" title="Verified, not claimed." sub="Each one links to its public verification page." />
+        <div className="grid gap-8 lg:grid-cols-2">
+          {groups.map((g) => (
+            <Reveal key={g}>
+              <h3 className="t-caption mb-2 px-5 font-medium text-muted">{g}</h3>
+              <ul className="overflow-hidden rounded-[1.5rem] border border-line bg-surface">
+                {certifications
+                  .filter((c) => c.group === g)
+                  .map((c) => (
+                    <li key={c.name} className="border-b border-line last:border-0">
+                      <a
+                        href={c.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface2 active:bg-surface3"
+                      >
+                        <span
+                          className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl font-mono text-[0.6875rem] font-semibold ${
+                            c.issuer === "Google Cloud" ? "bg-accent2/15 text-accent2" : "bg-accent/15 text-accent-ink"
+                          }`}
+                        >
+                          {c.issuer === "Google Cloud" ? "GCP" : "OCI"}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="t-callout block font-medium text-ink">{c.name}</span>
+                          <span className="t-caption flex items-center gap-1 text-muted">
+                            <BadgeCheck className="h-3.5 w-3.5 text-success" /> {c.issuer}
+                          </span>
+                        </span>
+                        <span className="t-caption flex shrink-0 items-center gap-0.5 text-faint group-hover:text-ink">
+                          Verify <ChevronRight className="h-4 w-4" />
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+              </ul>
             </Reveal>
           ))}
         </div>
@@ -132,39 +119,40 @@ export function Credentials() {
 
 const beyondIcons = { crown: Crown, shield: Shield, target: Target, heart: Heart };
 
-export function Background() {
+export function About() {
   return (
-    <section id="background" className="relative px-6 py-32 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading eyebrow="07 / Background" title="Education & beyond code." />
-        <div className="grid gap-5 lg:grid-cols-3">
-          {education.map((e, i) => (
-            <Reveal key={e.school} delay={i * 0.08}>
-              <TiltCard className="h-full p-7">
-                <p className="font-mono text-xs text-ink/40">{e.period}</p>
-                <h3 className="mt-3 text-xl font-semibold text-ink">{e.school}</h3>
-                <p className="text-ink/50">{e.place}</p>
-                <p className="mt-4 text-ink/70">{e.detail}</p>
-                <div className="mt-6 flex items-baseline gap-2">
-                  <span className="text-gradient text-4xl font-semibold">{e.score}</span>
-                  <span className="text-sm text-ink/40">{e.scoreLabel}</span>
-                </div>
-              </TiltCard>
-            </Reveal>
-          ))}
-        </div>
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <section id="about" className="scroll-mt-20 px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeader kicker="Background" title="Education & beyond code." />
+        <Reveal>
+          <ul className="overflow-hidden rounded-[1.75rem] border border-line bg-surface">
+            {education.map((e) => (
+              <li key={e.school} className="grid gap-2 border-b border-line px-6 py-6 last:border-0 md:grid-cols-[10rem_1fr_auto] md:items-center md:gap-8 md:px-8">
+                <span className="t-caption text-muted">{e.period}</span>
+                <span>
+                  <span className="t-title3 block text-ink">{e.school}</span>
+                  <span className="t-callout text-muted">
+                    {e.detail} · {e.place}
+                  </span>
+                </span>
+                <span className="flex items-baseline gap-2 md:justify-end">
+                  <span className="t-number text-[2.25rem] text-ink">{e.score}</span>
+                  <span className="t-caption text-muted">{e.scoreLabel}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {beyond.map((b, i) => {
             const I = beyondIcons[b.icon];
             return (
-              <Reveal key={b.title} delay={i * 0.06}>
-                <TiltCard className="h-full p-6" glow="color-mix(in srgb, var(--success) 20%, transparent)">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-success/20 to-accent2/10 text-success">
-                    <I className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-5 font-semibold text-ink">{b.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-ink/55">{b.text}</p>
-                </TiltCard>
+              <Reveal key={b.title} delay={i * 0.04} className="card p-6">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-success/12 text-success">
+                  <I className="h-5 w-5" />
+                </span>
+                <h3 className="t-headline mt-5 text-ink">{b.title}</h3>
+                <p className="t-callout mt-1.5 text-muted">{b.text}</p>
               </Reveal>
             );
           })}
@@ -183,51 +171,54 @@ export function Contact() {
     { label: "Codeforces", value: "YashSehrawat01", href: links.codeforces, icon: <Icons.codeforces className="h-5 w-5" /> },
   ];
   return (
-    <section id="contact" className="relative px-6 pb-16 pt-32 md:px-12">
-      <div className="mx-auto max-w-7xl">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-ink/10 bg-gradient-to-br from-accent/20 via-surface-solid/80 to-accent2/10 p-10 md:p-16">
-            <div className="pointer-events-none absolute -left-20 -top-20 h-[28rem] w-[28rem] animate-blob rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_28%,transparent)_0%,transparent_65%)]" />
-            <div className="pointer-events-none absolute -bottom-20 -right-20 h-[28rem] w-[28rem] animate-blob rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent-2)_22%,transparent)_0%,transparent_65%)] [animation-delay:-4s]" />
-            <p className="relative font-mono text-xs uppercase tracking-[0.3em] text-accent2/80">08 / Contact</p>
-            <h2 className="relative mt-4 max-w-3xl text-5xl font-semibold tracking-tight text-ink md:text-7xl">
-              Let&apos;s build something <span className="text-gradient">that scales.</span>
-            </h2>
-            <p className="relative mt-6 max-w-xl text-lg text-ink/60">
-              Open to backend and applied-AI roles. The fastest way to reach me is email.
-            </p>
-            <div className="relative mt-10">
-              <Magnetic>
-                <a
-                  href={links.email}
-                  className="inline-flex items-center gap-3 rounded-full bg-ink px-8 py-4 text-lg font-medium text-bg transition hover:shadow-[0_0_50px_color-mix(in_srgb,var(--accent)_45%,transparent)]"
-                >
-                  <Mail className="h-5 w-5" /> Say hello
-                </a>
-              </Magnetic>
-            </div>
-            <div className="relative mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {channels.map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  target={c.href.startsWith("mailto") ? undefined : "_blank"}
-                  rel="noreferrer"
-                  className="group flex items-center gap-3 rounded-2xl border border-ink/10 bg-bg/40 p-4 transition hover:border-ink/30 hover:bg-ink/5"
-                >
-                  <span className="text-ink/60 transition group-hover:text-ink">{c.icon}</span>
-                  <span className="min-w-0">
-                    <span className="block text-xs text-ink/40">{c.label}</span>
-                    <span className="block truncate text-sm text-ink/85">{c.value}</span>
-                  </span>
-                </a>
+    <section id="contact" className="scroll-mt-20 px-5 pb-12 pt-20 md:px-8 md:pt-28">
+      <div className="mx-auto max-w-6xl">
+        {/* Radial tints instead of a blur filter. */}
+        <Reveal className="relative overflow-hidden rounded-[2.25rem] border border-line p-8 md:p-16">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(70% 90% at 0% 0%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 60%), radial-gradient(60% 80% at 100% 100%, color-mix(in srgb, var(--accent-2) 14%, transparent) 0%, transparent 60%), var(--surface)",
+            }}
+          />
+          <div className="relative">
+            <p className="t-headline text-accent-ink">Contact</p>
+            <h2 className="t-title1 mt-2 max-w-3xl text-ink">Let&apos;s build something that scales.</h2>
+            <p className="t-lead mt-5 max-w-xl text-muted">Open to backend and applied-AI roles. The fastest way to reach me is email.</p>
+            <a
+              href={links.email}
+              className="pressable mt-9 inline-flex items-center gap-2.5 rounded-full bg-accent-fill px-7 py-3.5 text-[1.0625rem] font-medium text-on-accent hover:brightness-110"
+            >
+              <Mail className="h-5 w-5" /> Say hello
+            </a>
+            <ul className="mt-12 grid gap-px overflow-hidden rounded-[1.25rem] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+              {channels.map((c, i) => (
+                <li key={c.label} className={`bg-surface ${i === 0 ? "sm:col-span-2 lg:col-span-4" : ""}`}>
+                  <a
+                    href={c.href}
+                    target={c.href.startsWith("mailto") ? undefined : "_blank"}
+                    rel="noreferrer"
+                    className="group flex h-full items-center gap-3 p-4 transition-colors hover:bg-surface2 active:bg-surface3"
+                  >
+                    <span className="text-muted group-hover:text-ink">{c.icon}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="t-caption block text-muted">{c.label}</span>
+                      <span className="t-callout block truncate text-ink">{c.value}</span>
+                    </span>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-faint" />
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </Reveal>
-        <footer className="mt-12 flex flex-col items-center justify-between gap-3 text-sm text-ink/30 md:flex-row">
-          <span>© {new Date().getFullYear()} {profile.name}</span>
-          <span>Built with Next.js, React Three Fiber & Framer Motion · Deployed on Vercel</span>
+        <footer className="t-caption mt-10 flex flex-col items-center justify-between gap-2 text-faint md:flex-row">
+          <span>
+            © {new Date().getFullYear()} {profile.name}
+          </span>
+          <span>Built with Next.js and Framer Motion · Deployed on Vercel</span>
         </footer>
       </div>
     </section>

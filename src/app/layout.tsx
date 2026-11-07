@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Yash Sehrawat — Backend Engineer" },
 };
 
-export const viewport: Viewport = { themeColor: "#0b0b0c" };
+export const viewport: Viewport = { themeColor: "#000000" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
